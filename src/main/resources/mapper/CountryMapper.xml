@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 绑定Dao接口 -->
+<mapper namespace="com.ray.dao.CountryDao">
+
+    <!-- 在resultMap节点中，id表示哪个字段代表这主键，result节点定义了普通的映射关系，
+         这里的property表示JavaBean中的属性名称，column表示数据库中的字段名称，
+         javaType代表JavaBean中该属性的类型，jdbcType则表示数据库中该字段的类型 -->
+    <resultMap id="BaseResultMap" type="com.ray.entity.Country">
+        <id column="Id" jdbcType="INTEGER" property="id"/>
+        <result column="countryname" jdbcType="VARCHAR" property="countryname"/>
+        <result column="countrycode" jdbcType="VARCHAR" property="countrycode"/>
+    </resultMap>
+
+    <!-- <sql>用来封装SQL语句 -->
+    <sql id="Base_Column_List">
+        id,countryname,countrycode
+    </sql>
+
+    <!-- 根据id查询所有国家信息 resultMap则是对外部ResultMap的引用-->
+    <select id="selectByKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        country
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有国家信息 + 判断条件 + 模糊查询 resultMap则是对外部ResultMap的引用-->
+    <select id="selectByCountryQueryModel" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        country
+        <where>
+            <if test="countryname != null and countryname != ''">
+                countryname LIKE concat('%',#{countryname}, '%')
+            </if>
+            <if test="countrycode != null and countrycode != ''">
+                AND countrycode LIKE concat('%', concat(#{countrycode}, '%'))
+            </if>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <!-- 新增国家信息 parameterType为输入参数-->
+    <insert id="insert" parameterType="Country">
+        INSERT INTO
+        country
+        VALUES(#{id}, #{countryname} ,#{countrycode})
+    </insert>
+
+    <!-- 修改国家信息 parameterType为输入参数-->
+    <update id="update" parameterType="Country">
+        UPDATE
+        country
+        SET countryname = #{countryname}, countrycode = #{countrycode}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除国家信息 parameterType为输入参数-->
+    <delete id="delete" parameterType="Integer">
+        DELETE FROM country WHERE id = #{id}
+    </delete>
+
+</mapper>
